@@ -10,7 +10,7 @@ import utils.PathsHelper;
 import java.util.Optional;
 
 public class ExtractProcessor {
-    public static SparkSession currentSession = new SparkHelper().StartSession("Extract");
+    public static final SparkSession currentSession = new SparkHelper().StartSession("Extract");
 
     public static void process() {
         final Optional<String> path = PathsHelper.tryGetPath("/src/main/resources/dataset.json");
@@ -21,17 +21,25 @@ public class ExtractProcessor {
         });
     }
 
+    /**
+     * Filter the source dataset if event is of type "app_loaded" and select only needed columns
+     * Rename timestamp to time to fit the specifications
+     */
     public static Dataset<Row> getAppLoadedEvents(Dataset<Row> events) {
         return events
                 .filter(col("event").equalTo("app_loaded"))
-                .select(col("timestamp"), events.col("initiator_id"), events.col("device_type"))
+                .select(col("timestamp"), col("initiator_id"), col("device_type"))
                 .withColumnRenamed("timestamp", "time");
     }
 
+    /**
+     * Filter the source dataset if event is of type "registered" and select only needed columns
+     * Rename timestamp to time to fit the specifications
+     */
     public static Dataset<Row> getRegisteredEvents(Dataset<Row> events) {
         return events
                 .filter(col("event").equalTo("registered"))
-                .select(col("timestamp"), events.col("initiator_id"), events.col("channel"))
+                .select(col("timestamp"), col("initiator_id"), col("channel"))
                 .withColumnRenamed("timestamp", "time");
     }
 
